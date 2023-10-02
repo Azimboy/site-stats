@@ -1,4 +1,4 @@
-import TextHelpers.findMostCommonAndSimilarText
+import TextHelpers.{findMostCommonAndSimilarText, getAddressScore}
 import Utils.{SparkSessionHelpers, DataFrameHelpers, createSparkSession}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{levenshtein => lev, _}
@@ -49,6 +49,16 @@ object CompanyStats {
       texts.headOption.map(_ => findMostCommonAndSimilarText(texts))
     }
 
+    val getAddressUdf = udf {(address1: Option[String], address2: Option[String]) =>
+      val adr1Score = address1.flatMap(getAddressScore).getOrElse(0)
+      val adr2Score = address2.flatMap(getAddressScore).getOrElse(0)
+      if (adr2Score > adr1Score) {
+        address2
+      } else {
+        address1
+      }
+    }
+
     googleDs.join(facebookDs, lev(googleDs("company_name"), facebookDs("company_name")) <= 50 &&
         googleDs("domain") <=> facebookDs("domain") &&
         googleDs("phone") <=> facebookDs("phone") &&
@@ -67,19 +77,20 @@ object CompanyStats {
         coalesce(googleDs("country_name"), facebookDs("country_name"), websiteDs("country_name")).as("country_name"),
         coalesce(googleDs("region_name"), facebookDs("region_name"), websiteDs("region_name")).as("region_name"),
         coalesce(googleDs("city"), facebookDs("city"), websiteDs("city")).as("city"),
-        coalesce(googleDs("address"), facebookDs("address")).as("address"),
+        getAddressUdf(googleDs("address"), facebookDs("address")).as("address"),
         coalesce(googleDs("phone"), facebookDs("phone"), websiteDs("phone")).as("phone"),
         facebookDs("email").as("email"),
         facebookDs("link").as("link"),
         coalesce(googleDs("zip_code"), facebookDs("zip_code")).as("zip_code"),
         facebookDs("page_type").as("page_type"),
         coalesce(googleDs("description"), facebookDs("description"), websiteDs("description")).as("description")
-      ).writeParquet("sites")
-
+      )
+      .writeParquet("sites")
+//      .show(100, false)
     val sitesDs = sparkSession.readParquet("sites")
 
     sitesDs.printSchema()
-    sitesDs.show(500, false)
+    sitesDs.show(100, false)
 
   }
 }
