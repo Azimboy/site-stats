@@ -20,7 +20,7 @@ object Utils {
   }
 
   implicit class DataFrameHelpers(dataFrame: DataFrame) {
-    def writeParquet(tableName: String, partitionCol: String*): Unit = {
+    def writeParquet(tableName: String): Unit = {
       dataFrame.repartition(1)
         .write
         .mode(SaveMode.Overwrite)
