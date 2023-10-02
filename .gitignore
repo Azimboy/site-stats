@@ -14,3 +14,6 @@ dist
 /.project
 /RUNNING_PID
 /.settings
+/src/main/resources/facebook_dataset.csv
+/src/main/resources/google_dataset.csv
+/src/main/resources/website_dataset.csv
