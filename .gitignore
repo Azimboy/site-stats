@@ -1,4 +1,16 @@
 # Project exclude paths
 /project/target/
 /target/
-/target/scala-2.13/classes/
+/target/scala-2.12/classes/
+tmp
+.history
+dist
+/.idea
+/.bsp
+/*.iml
+/out
+/.idea_modules
+/.classpath
+/.project
+/RUNNING_PID
+/.settings
