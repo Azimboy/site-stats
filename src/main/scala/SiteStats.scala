@@ -3,7 +3,7 @@ import Utils.{SparkSessionHelpers, DataFrameHelpers, createSparkSession}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{levenshtein => lev, _}
 
-object CompanyStats {
+object SiteStats {
 
   def main(args: Array[String]): Unit = {
     val sparkSession: SparkSession = createSparkSession(this.getClass.getName)
